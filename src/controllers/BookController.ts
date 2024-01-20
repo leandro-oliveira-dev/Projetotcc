@@ -11,11 +11,11 @@ export class BookController {
       const book = await prisma.book.create({
         data: {
           name,
-          qtd,
+          qtd: Number(qtd),
           author,
           position,
           status,
-          code,
+          code: Number(code),
         },
       });
 
@@ -27,6 +27,7 @@ export class BookController {
       return response.status(500).json({
         error: true,
         message: 'Falha ao cadastrar o livro',
+        internalError: error,
       });
     }
   }
@@ -34,9 +35,7 @@ export class BookController {
   static async ListBook(request: Request, response: Response) {
     const book = await prisma.book.findMany();
 
-    return response.json({
-      book,
-    });
+    return response.json(book);
   }
 
   static async UpdateBook(request: Request, response: Response) {

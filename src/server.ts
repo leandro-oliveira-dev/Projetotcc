@@ -7,8 +7,9 @@ import { booksRouter } from './routes/books';
 
 const app = Express();
 
-app.use(Express.json());
 app.use(cors());
+
+app.use(Express.json());
 
 app.use(userRouter);
 app.use(booksRouter);
