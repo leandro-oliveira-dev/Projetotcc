@@ -20,14 +20,12 @@ export class BookController {
       });
 
       return response.json({
-        message: 'Sucesso: Livro cadastrado com sucesso!',
+        message: 'Livro cadastrado com sucesso!',
         book,
       });
     } catch (error) {
       return response.status(500).json({
-        error: true,
         message: 'Falha ao cadastrar o livro',
-        internalError: error,
       });
     }
   }
