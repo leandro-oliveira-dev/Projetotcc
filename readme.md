@@ -1,3 +1,8 @@
+## Preencher variveis no arquivo .env
+
+DATABASE_URL=
+PORT=
+
 ## Instalacao do postgres via docker
 
 `docker build -t postgres-image .`
@@ -10,11 +15,12 @@
 
 `docker start postgres-container`
 
-
 # Prisma
 
 ## Atualizar prisma client class
+
 `yarn prisma generate`
 
 ## Sincronizar o banco de dados com as migrations
+
 `yarn prisma migrate dev`
