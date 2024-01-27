@@ -24,3 +24,7 @@ PORT=
 ## Sincronizar o banco de dados com as migrations
 
 `yarn prisma migrate dev`
+
+## Criar nova migration (APENAS AO ALTERAR SCHEMA DO PRISMA)
+
+`yarn prisma migrate dev --name <NOME_DA_MIGRATION>`

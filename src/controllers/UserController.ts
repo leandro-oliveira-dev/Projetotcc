@@ -2,24 +2,40 @@
 import { Request, Response } from 'express';
 
 import { prisma } from '@/database';
+import { PasswordController } from './PasswordController';
 
 export class UserController {
   static async CreateUser(request: Request, response: Response) {
     const { name, email, ra } = request.body;
 
-    const userExist = await prisma.user.findUnique({ where: { email, ra } });
+    const userAuthExist = await prisma.auth.findUnique({
+      where: { email, ra },
+    });
 
-    if (userExist) {
+    if (userAuthExist) {
       return response.status(400).json({
         message: 'Error: Usuário já existe!',
+      });
+    }
+
+    const password = await PasswordController.Create('1234');
+
+    if (!password) {
+      return response.status(400).json({
+        message: 'Falha ao gerar senha!',
       });
     }
 
     const user = await prisma.user.create({
       data: {
         name,
-        email,
-        ra,
+        auth: {
+          create: {
+            email,
+            password,
+            ra,
+          },
+        },
       },
     });
 
@@ -30,7 +46,17 @@ export class UserController {
   }
 
   static async ListUser(request: Request, response: Response) {
-    const users = await prisma.user.findMany();
+    const users = await prisma.user.findMany({
+      include: {
+        auth: {
+          select: {
+            email: true,
+            ra: true,
+            password: true,
+          },
+        },
+      },
+    });
 
     return response.json(users);
   }
