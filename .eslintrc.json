@@ -8,8 +8,9 @@
     "prettier/prettier": [
       "error",
       {
-        "semi": true
-      }
+        "semi": true,
+        "endOfLine": "auto"
+      },
     ]
   }
 }
