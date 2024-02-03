@@ -31,15 +31,24 @@ export class BookController {
   }
 
   static async ListBook(request: Request, response: Response) {
-    const book = await prisma.book.findMany();
+    const book = await prisma.book.findMany({
+      orderBy: {
+        created_at: 'desc',
+      },
+    });
 
     return response.json(book);
   }
 
   static async UpdateBook(request: Request, response: Response) {
-    const { id, name, author, position, status } = request.body;
+    const { name, author, position, status } = request.body;
+    const { id } = request.params;
 
-    const bookExists = await prisma.book.findUnique(id);
+    const bookExists = await prisma.book.findFirst({
+      where: {
+        id,
+      },
+    });
 
     if (!bookExists) {
       return response.status(400).json({
