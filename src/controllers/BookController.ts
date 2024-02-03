@@ -31,13 +31,13 @@ export class BookController {
   }
 
   static async ListBook(request: Request, response: Response) {
-    const book = await prisma.book.findMany({
+    const books = await prisma.book.findMany({
       orderBy: {
         created_at: 'desc',
       },
     });
 
-    return response.json(book);
+    return response.json(books);
   }
 
   static async UpdateBook(request: Request, response: Response) {
