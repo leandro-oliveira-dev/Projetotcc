@@ -31,13 +31,40 @@ export class BookController {
   }
 
   static async ListBook(request: Request, response: Response) {
-    const books = await prisma.book.findMany({
-      orderBy: {
-        created_at: 'desc',
-      },
-    });
+    try {
+      const { page = 1, pageSize = 10 } = request.query;
+      const pageNumber = parseInt(page as string, 10);
+      const pageSizeNumber = parseInt(pageSize as string, 10);
 
-    return response.json(books);
+      const skip = (pageNumber - 1) * pageSizeNumber;
+      const take = pageSizeNumber;
+      const totalBooks = await prisma.book.count();
+      const totalPages = Math.ceil(totalBooks / pageSizeNumber);
+
+      const hasPreviousPage = pageNumber > 1;
+      const hasNextPage = pageNumber < totalPages;
+
+      const books = await prisma.book.findMany({
+        orderBy: {
+          created_at: 'desc',
+        },
+        skip,
+        take,
+      });
+
+      return response.json({
+        books,
+        totalBooks,
+        totalPages,
+        hasPreviousPage,
+        hasNextPage,
+      });
+    } catch (error) {
+      console.error(error);
+      return response.status(500).json({
+        message: 'Falha ao listar os livros',
+      });
+    }
   }
 
   static async UpdateBook(request: Request, response: Response) {
