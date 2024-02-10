@@ -2,6 +2,7 @@
 
 DATABASE_URL=
 PORT=
+SECRET_KEY=
 
 ## Instalacao do postgres via docker
 
