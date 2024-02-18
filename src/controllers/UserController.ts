@@ -26,7 +26,7 @@ export class UserController {
       });
     }
 
-    const user = await prisma.user.create({
+    const createdUser = await prisma.user.create({
       data: {
         name,
         auth: {
@@ -39,14 +39,10 @@ export class UserController {
       },
     });
 
-    return response.json({
-      message: 'Sucesso: Usuário cadastrado com sucesso!',
-      user,
-    });
-  }
-
-  static async ListUser(request: Request, response: Response) {
-    const users = await prisma.user.findMany({
+    const user = await prisma.user.findFirst({
+      where: {
+        id: createdUser.id,
+      },
       include: {
         auth: {
           select: {
@@ -58,7 +54,49 @@ export class UserController {
       },
     });
 
-    return response.json(users);
+    return response.json({
+      message: 'Sucesso: Usuário cadastrado com sucesso!',
+      user,
+    });
+  }
+
+  static async ListUser(request: Request, response: Response) {
+    const { page = 1, pageSize = 10 } = request.query;
+    const pageNumber = parseInt(page as string, 10);
+    const pageSizeNumber = parseInt(pageSize as string, 10);
+
+    const skip = (pageNumber - 1) * pageSizeNumber;
+    const take = pageSizeNumber;
+    const totalBooks = await prisma.book.count();
+    const totalPages = Math.ceil(totalBooks / pageSizeNumber);
+
+    const hasPreviousPage = pageNumber > 1;
+    const hasNextPage = pageNumber < totalPages;
+
+    const users = await prisma.user.findMany({
+      orderBy: {
+        created_at: 'desc',
+      },
+      include: {
+        auth: {
+          select: {
+            email: true,
+            ra: true,
+            password: true,
+          },
+        },
+      },
+      skip,
+      take,
+    });
+
+    return response.json({
+      users,
+      totalBooks,
+      totalPages,
+      hasPreviousPage,
+      hasNextPage,
+    });
   }
 
   static async UpdateUser(request: Request, response: Response) {
