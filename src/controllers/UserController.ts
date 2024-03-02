@@ -6,7 +6,7 @@ import { PasswordController } from './PasswordController';
 
 export class UserController {
   static async CreateUser(request: Request, response: Response) {
-    const { name, email, ra } = request.body;
+    const { name, email, ra, password, isAdmin } = request.body;
 
     const userAuthExist = await prisma.auth.findUnique({
       where: { email, ra },
@@ -18,9 +18,9 @@ export class UserController {
       });
     }
 
-    const password = await PasswordController.Create('1234');
+    const generatedPassword = await PasswordController.Create(password);
 
-    if (!password) {
+    if (!generatedPassword) {
       return response.status(400).json({
         message: 'Falha ao gerar senha!',
       });
@@ -29,10 +29,11 @@ export class UserController {
     const createdUser = await prisma.user.create({
       data: {
         name,
+        isAdmin,
         auth: {
           create: {
             email,
-            password,
+            password: generatedPassword,
             ra,
           },
         },
