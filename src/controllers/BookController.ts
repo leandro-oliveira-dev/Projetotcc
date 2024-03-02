@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 
 import { prisma } from '@/database';
 import { IBook } from '@/interfaces/IBook';
+import { AuthenticatedRequest } from '@/middlewares/authMiddleware';
 
 export class BookController {
   static async CreateBook(request: Request, response: Response) {
@@ -30,7 +31,7 @@ export class BookController {
     }
   }
 
-  static async ListBook(request: Request, response: Response) {
+  static async ListBook(request: AuthenticatedRequest, response: Response) {
     try {
       const { page = 1, pageSize = 10 } = request.query;
       const pageNumber = parseInt(page as string, 10);

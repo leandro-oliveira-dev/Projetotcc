@@ -1,6 +1,8 @@
 import { prisma } from '@/database';
+import { Response } from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import { AuthenticatedRequest } from '@/middlewares/authMiddleware';
 
 interface SignParams {
   email: string;
@@ -35,5 +37,25 @@ export class AuthController {
     );
 
     return { auth, token };
+  }
+
+  static async CurrentUser(request: AuthenticatedRequest, response: Response) {
+    if (!request.authenticated?.userId) return response.sendStatus(400);
+
+    const user = await prisma.user.findFirst({
+      include: {
+        auth: {
+          select: {
+            email: true,
+            ra: true,
+          },
+        },
+      },
+      where: {
+        id: request.authenticated?.userId,
+      },
+    });
+
+    return response.json(user);
   }
 }

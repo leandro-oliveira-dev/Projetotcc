@@ -2,14 +2,14 @@ import { Request, Response, NextFunction } from 'express';
 
 import jwt from 'jsonwebtoken';
 
-interface User {
-  name: string;
-  email: string;
-  ra: string;
+interface ITokenDecoded {
+  userId: string;
+  iat: string;
+  exp: string;
 }
 
-interface AuthenticatedRequest extends Request {
-  user?: User;
+export interface AuthenticatedRequest extends Request {
+  authenticated?: ITokenDecoded;
 }
 
 export async function authMiddleware(
@@ -23,13 +23,17 @@ export async function authMiddleware(
     return response.status(401).json({ message: 'Unauthorized' });
   }
 
-  jwt.verify(token, String(process.env.SECRET_KEY), (err, user) => {
-    if (err) {
-      return response.status(403).json({ message: 'Forbidden' });
+  jwt.verify(
+    token.split('Bearer')[1].trim(),
+    String(process.env.SECRET_KEY),
+    (err, authenticated) => {
+      if (err) {
+        return response.status(403).json({ message: 'Forbidden' });
+      }
+
+      request.authenticated = authenticated as any;
+
+      next();
     }
-
-    request.user = user as User;
-
-    next();
-  });
+  );
 }
