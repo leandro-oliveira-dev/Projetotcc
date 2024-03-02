@@ -47,14 +47,10 @@ async function main() {
 
   const admin = await CreateUser({
     name: 'admin',
-    email: 'admin@email.com',
+    email: 'admin2@email.com',
     ra: '1111',
     password: '1234',
-  });
-
-  console.log({
-    student,
-    admin,
+    isAdmin: true,
   });
 }
 
