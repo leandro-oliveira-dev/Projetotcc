@@ -22,6 +22,10 @@ SECRET_KEY=
 
 `yarn prisma generate`
 
+## Seed DB initial data
+
+`yarn prisma db seed`
+
 ## Sincronizar o banco de dados com as migrations
 
 `yarn prisma migrate dev`
