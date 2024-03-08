@@ -131,4 +131,60 @@ export class BookController {
       book,
     });
   }
+
+  static async BorrowBook(request: Request, response: Response) {
+    try {
+      const { userId, duration } = request.body;
+      const { id } = request.params;
+
+      // Verificar se o livro existe
+      const book = await prisma.book.findFirst({
+        where: {
+          id,
+        },
+      });
+
+      if (!book) {
+        return response.status(404).json({
+          message: 'Livro não encontrado!',
+        });
+      }
+
+      // Verificar se o livro está disponível para empréstimo
+      if (book.status !== 'disponivel') {
+        return response.status(400).json({
+          message: 'Livro não disponível para empréstimo!',
+        });
+      }
+
+      // Atualizar o status do livro para emprestado
+      const updatedBook = await prisma.book.update({
+        where: {
+          id,
+        },
+        data: {
+          status: 'emprestado',
+        },
+      });
+
+      /*const borrowedBook = await prisma.borrowedBook.create({
+        data: {
+          bookId: updatedBook.id, // ID do livro emprestado
+          userId, // ID do usuário que está emprestando o livro
+          duration, // Duração do empréstimo (em dias, por exemplo)
+          borrowedAt: new Date(), // Data e hora do empréstimo
+        },
+      });*/
+
+      return response.json({
+        message: 'Livro emprestado com sucesso!',
+        book: updatedBook,
+      });
+    } catch (error) {
+      console.error(error);
+      return response.status(500).json({
+        message: 'Erro ao emprestar o livro!',
+      });
+    }
+  }
 }
