@@ -46,6 +46,13 @@ export class BookController {
       const hasNextPage = pageNumber < totalPages;
 
       const books = await prisma.book.findMany({
+        include: {
+          BorrowedBook: {
+            select: {
+              id: true,
+            },
+          },
+        },
         orderBy: {
           created_at: 'desc',
         },
@@ -134,7 +141,7 @@ export class BookController {
 
   static async BorrowBook(request: Request, response: Response) {
     try {
-      const { userId, duration } = request.body;
+      const { userId } = request.body;
       const { id } = request.params;
 
       // Verificar se o livro existe
@@ -157,6 +164,27 @@ export class BookController {
         });
       }
 
+      const borrowedBookCount = await prisma.borrowedBook.count({
+        where: {
+          bookId: id,
+        },
+      });
+
+      if (borrowedBookCount >= book.qtd) {
+        return response.status(400).json({
+          message: 'Todos livros ja foram emprestados!',
+        });
+      }
+
+      const created = await prisma.borrowedBook.create({
+        data: {
+          bookId: id,
+          userId,
+        },
+      });
+
+      console.log({ created });
+
       // Atualizar o status do livro para emprestado
       const updatedBook = await prisma.book.update({
         where: {
@@ -166,15 +194,6 @@ export class BookController {
           status: 'emprestado',
         },
       });
-
-      /*const borrowedBook = await prisma.borrowedBook.create({
-        data: {
-          bookId: updatedBook.id, // ID do livro emprestado
-          userId, // ID do usuário que está emprestando o livro
-          duration, // Duração do empréstimo (em dias, por exemplo)
-          borrowedAt: new Date(), // Data e hora do empréstimo
-        },
-      });*/
 
       return response.json({
         message: 'Livro emprestado com sucesso!',
