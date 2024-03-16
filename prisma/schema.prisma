@@ -45,6 +45,7 @@ model BorrowedBook {
   userId String
 
   createdAt DateTime @default(now())
+  returnAt DateTime?
 }
 
 model User {
