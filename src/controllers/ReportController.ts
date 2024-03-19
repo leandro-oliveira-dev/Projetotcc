@@ -50,4 +50,25 @@ export class ReportController {
 
     return response.sendStatus(200);
   }
+
+  public static async ReportUserController(
+    request: Request,
+    response: Response
+  ) {
+    const { userId } = request.params;
+
+    const user = await prisma.user.findFirst({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user) {
+      return response.status(404).json({
+        message: 'User not found',
+      });
+    }
+
+    return response.json(user);
+  }
 }
