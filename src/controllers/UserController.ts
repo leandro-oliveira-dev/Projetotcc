@@ -101,11 +101,12 @@ export class UserController {
   }
 
   static async UpdateUser(request: Request, response: Response) {
-    const { id, name, email, enabled } = request.body;
+    const { name, ra, email } = request.body;
+    const { userId } = request.params;
 
     const userExist = await prisma.user.findFirst({
       where: {
-        id,
+        id: userId,
       },
     });
 
@@ -115,18 +116,19 @@ export class UserController {
       });
     }
 
-    // spread operator
-    const userData = {
-      ...(name && { name }),
-      ...(email && { email }),
-      ...(enabled !== undefined && { enabled }),
-    };
-
     await prisma.user.update({
       where: {
-        id,
+        id: userId,
       },
-      data: userData,
+      data: {
+        name,
+        auth: {
+          update: {
+            email,
+            ra,
+          },
+        },
+      },
     });
 
     return response.json({

@@ -9,7 +9,7 @@ const userRouter = Router();
 
 userRouter.use(authMiddleware);
 userRouter.post('/users/create', UserController.CreateUser);
-userRouter.put('/users/update', UserController.UpdateUser);
+userRouter.put('/users/update/:userId', UserController.UpdateUser);
 userRouter.get('/users/list', UserController.ListUser);
 userRouter.get('/users', AuthController.CurrentUser);
 
