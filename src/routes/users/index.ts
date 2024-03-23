@@ -13,9 +13,6 @@ userRouter.put('/users/update', UserController.UpdateUser);
 userRouter.get('/users/list', UserController.ListUser);
 userRouter.get('/users', AuthController.CurrentUser);
 
-userRouter.get(
-  '/users/:userId/usuario-report',
-  ReportController.ReportUserController
-);
+userRouter.get('/users/usuario-report', ReportController.ReportUserController);
 
 export { userRouter };

@@ -55,20 +55,16 @@ export class ReportController {
     request: Request,
     response: Response
   ) {
-    const { userId } = request.params;
-
-    const user = await prisma.user.findFirst({
-      where: {
-        id: userId,
-      },
+    const users = await prisma.user.findMany({
+      include: { auth: { select: { ra: true } } },
     });
 
-    if (!user) {
+    if (!users.length) {
       return response.status(404).json({
         message: 'User not found',
       });
     }
 
-    return response.json(user);
+    return response.json(users);
   }
 }
