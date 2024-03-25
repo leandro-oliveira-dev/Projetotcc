@@ -87,7 +87,7 @@ export class BookController {
   }
 
   static async UpdateBook(request: Request, response: Response) {
-    const { name, author, position, status, qtd } = request.body;
+    const { name, author, position, status, code, qtd } = request.body;
     const { id } = request.params;
 
     const bookExists = await prisma.book.findFirst({
@@ -109,6 +109,7 @@ export class BookController {
 
       data: {
         name,
+        code,
         author,
         qtd,
         position,
