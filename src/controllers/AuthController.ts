@@ -17,6 +17,9 @@ export class AuthController {
         user: true,
       },
       where: {
+        user: {
+          enabled: true,
+        },
         email,
         ra,
       },
@@ -53,6 +56,7 @@ export class AuthController {
       },
       where: {
         id: request.authenticated?.userId,
+        enabled: true,
       },
     });
 
