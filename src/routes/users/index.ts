@@ -12,6 +12,8 @@ userRouter.post('/users/create', UserController.CreateUser);
 userRouter.put('/users/update/:userId', UserController.UpdateUser);
 userRouter.get('/users/list', UserController.ListUser);
 userRouter.get('/users', AuthController.CurrentUser);
+userRouter.delete('/users/delete/:userId', UserController.DisableUser);
+userRouter.put('/users/enable/:userId', UserController.EnableUser);
 
 userRouter.get('/users/usuario-report', ReportController.ReportUserController);
 

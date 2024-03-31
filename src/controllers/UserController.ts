@@ -149,4 +149,26 @@ export class UserController {
       user,
     });
   }
+
+  static async DisableUser(request: Request, response: Response) {
+    const { userId } = request.params;
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { enabled: false },
+    });
+
+    return response.sendStatus(204);
+  }
+
+  static async EnableUser(request: Request, response: Response) {
+    const { userId } = request.params;
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { enabled: true },
+    });
+
+    return response.sendStatus(204);
+  }
 }
