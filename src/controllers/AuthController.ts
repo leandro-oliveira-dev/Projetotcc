@@ -53,6 +53,7 @@ export class AuthController {
       },
       where: {
         id: request.authenticated?.userId,
+        enabled: true,
       },
     });
 
