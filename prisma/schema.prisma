@@ -47,7 +47,14 @@ model BorrowedBook {
   createdAt DateTime @default(now())
   returnAt DateTime?
 }
-
+model Donation {
+  id String @id @default(uuid())
+  userId String 
+  user User @relation(fields: [userId], references: [id])
+  created_at DateTime @default(now())
+  
+  scheduled_date DateTime 
+}
 model User {
   id         String   @id @default(uuid())
   name       String
@@ -57,6 +64,8 @@ model User {
 
   auth         Auth?
   BorrowedBook BorrowedBook[]
+  donation Donation []
+  
 }
 
 model Book {
