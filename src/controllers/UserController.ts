@@ -116,9 +116,22 @@ export class UserController {
       });
     }
 
-    await prisma.user.update({
+    const user = await prisma.user.update({
       where: {
         id: userId,
+      },
+      select: {
+        name: true,
+        enabled: true,
+        isAdmin: true,
+        created_at: true,
+        id: true,
+        auth: {
+          select: {
+            email: true,
+            ra: true,
+          },
+        },
       },
       data: {
         name,
@@ -133,6 +146,7 @@ export class UserController {
 
     return response.json({
       message: 'Usuario atualizado com sucesso',
+      user,
     });
   }
 }
