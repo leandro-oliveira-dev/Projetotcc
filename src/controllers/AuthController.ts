@@ -17,6 +17,9 @@ export class AuthController {
         user: true,
       },
       where: {
+        user: {
+          enabled: true,
+        },
         email,
         ra,
       },
