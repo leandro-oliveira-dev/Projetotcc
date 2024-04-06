@@ -9,28 +9,34 @@ export class BorrowBookController {
       const { bookId } = request.params;
 
       // Verificar se o livro existe
+      const bookAlreadyBorrowedByThisUser = await prisma.borrowedBook.findFirst(
+        {
+          where: {
+            userId,
+            bookId,
+            returnAt: null,
+          },
+        }
+      );
+
+      if (bookAlreadyBorrowedByThisUser) {
+        return response.status(404).json({
+          message: 'Livro ja emprestado por esse usuario!',
+        });
+      }
+
       const book = await prisma.book.findFirst({
         where: {
           id: bookId,
-          BorrowedBook: {
-            none: {
-              userId,
-            },
-          },
         },
         include: {
-          BorrowedBook: {
-            select: {
-              id: true,
-              userId: true,
-            },
-          },
+          BorrowedBook: true,
         },
       });
 
       if (!book) {
         return response.status(404).json({
-          message: 'Livro não encontrado, ou ja emprestado!',
+          message: 'Livro nao encontrado!',
         });
       }
 
@@ -44,6 +50,7 @@ export class BorrowBookController {
       const borrowedBookCount = await prisma.borrowedBook.count({
         where: {
           bookId,
+          returnAt: null,
         },
       });
 
@@ -60,26 +67,39 @@ export class BorrowBookController {
         },
       });
 
+      const currentBorrowedBooks = book.BorrowedBook.filter(
+        (borrowedBook) => !borrowedBook.returnAt
+      ).length;
+
+      const isBookFull = currentBorrowedBooks <= book.qtd;
+
       // Atualizar o status do livro para emprestado
-      const updatedBook = await prisma.book.update({
-        where: {
-          id: bookId,
-        },
-        include: {
-          BorrowedBook: {
-            select: {
-              id: true,
+      if (isBookFull) {
+        const updatedBook = await prisma.book.update({
+          where: {
+            id: bookId,
+          },
+          include: {
+            BorrowedBook: {
+              select: {
+                id: true,
+              },
             },
           },
-        },
-        data: {
-          status: 'emprestado',
-        },
-      });
+          data: {
+            status: 'emprestado',
+          },
+        });
+
+        return response.json({
+          message: 'Livro emprestado com sucesso!',
+          book: updatedBook,
+        });
+      }
 
       return response.json({
         message: 'Livro emprestado com sucesso!',
-        book: updatedBook,
+        book,
       });
     } catch (error) {
       console.error(error);
@@ -87,5 +107,54 @@ export class BorrowBookController {
         message: 'Erro ao emprestar o livro!',
       });
     }
+  }
+
+  static async ReturnBorrowedBook(request: Request, response: Response) {
+    const { borrowedBookId } = request.params;
+
+    await prisma.borrowedBook.update({
+      where: {
+        id: borrowedBookId,
+      },
+      data: {
+        returnAt: new Date(),
+      },
+    });
+
+    const book = await prisma.book.findFirst({
+      include: {
+        BorrowedBook: true,
+      },
+      where: {
+        BorrowedBook: {
+          some: {
+            id: borrowedBookId,
+          },
+        },
+      },
+    });
+
+    if (!book) {
+      return response.status(404).json({
+        message: 'Livro nao encontrado!',
+      });
+    }
+
+    const currentBorrowedBooks = book.BorrowedBook.filter(
+      (borrowedBook) => !borrowedBook.returnAt
+    ).length;
+
+    const isBookFull = currentBorrowedBooks >= book.qtd;
+
+    await prisma.book.update({
+      where: {
+        id: book.id,
+      },
+      data: {
+        status: isBookFull ? 'emprestado' : 'disponivel',
+      },
+    });
+
+    return response.sendStatus(201);
   }
 }

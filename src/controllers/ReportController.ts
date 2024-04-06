@@ -36,21 +36,6 @@ export class ReportController {
     return response.json({ borrowedBooks, book });
   }
 
-  public static async ReturnBorrowedBook(request: Request, response: Response) {
-    const { borrowedBookId } = request.body;
-
-    await prisma.borrowedBook.update({
-      where: {
-        id: borrowedBookId,
-      },
-      data: {
-        returnAt: new Date(),
-      },
-    });
-
-    return response.sendStatus(200);
-  }
-
   public static async ReportUserController(
     request: Request,
     response: Response

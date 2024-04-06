@@ -51,6 +51,7 @@ export class BookController {
             select: {
               id: true,
               userId: true,
+              returnAt: true,
             },
           },
         },
@@ -65,7 +66,8 @@ export class BookController {
         const alreadyBorrowed =
           book.BorrowedBook.filter(
             (borrowedBook) =>
-              borrowedBook.userId === request.authenticated?.userId
+              borrowedBook.userId === request.authenticated?.userId &&
+              borrowedBook.returnAt === null
           ).length > 0;
 
         return { ...book, alreadyBorrowed };
