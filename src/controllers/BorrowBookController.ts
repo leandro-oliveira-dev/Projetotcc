@@ -30,7 +30,11 @@ export class BorrowBookController {
           id: bookId,
         },
         include: {
-          BorrowedBook: true,
+          BorrowedBook: {
+            where: {
+              returnAt: null,
+            },
+          },
         },
       });
 
@@ -83,6 +87,10 @@ export class BorrowBookController {
             BorrowedBook: {
               select: {
                 id: true,
+                returnAt: true,
+              },
+              where: {
+                returnAt: null,
               },
             },
           },

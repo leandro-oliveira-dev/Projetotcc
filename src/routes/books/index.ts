@@ -19,6 +19,8 @@ booksRouter.get(
   ReportController.ListBookDetail
 );
 
+booksRouter.get('/books/borrowed-report', ReportController.ListAllBooksDetail);
+
 booksRouter.put(
   '/books/borrow/:borrowedBookId/return',
   BorrowBookController.ReturnBorrowedBook

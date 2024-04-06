@@ -53,6 +53,9 @@ export class BookController {
               userId: true,
               returnAt: true,
             },
+            where: {
+              returnAt: null,
+            },
           },
         },
         orderBy: {
