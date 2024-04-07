@@ -5,6 +5,22 @@ export class ReportController {
   public static async ListBookDetail(request: Request, response: Response) {
     const { bookId } = request.params;
 
+    const { page = 1, pageSize = 10 } = request.query;
+
+    const pageNumber = parseInt(page as string, 10);
+    const pageSizeNumber = parseInt(pageSize as string, 10);
+    const skip = (pageNumber - 1) * pageSizeNumber;
+    const take = pageSizeNumber;
+    const totalBooks = await prisma.borrowedBook.count({
+      where: {
+        id: bookId,
+      },
+    });
+    const totalPages = Math.ceil(totalBooks / pageSizeNumber);
+
+    const hasPreviousPage = pageNumber > 1;
+    const hasNextPage = pageNumber < totalPages;
+
     const book = await prisma.book.findFirst({
       where: {
         id: bookId,
@@ -26,6 +42,8 @@ export class ReportController {
           },
         },
       },
+      skip,
+      take,
     });
 
     if (!borrowedBooks)
@@ -33,10 +51,29 @@ export class ReportController {
         message: 'borrowed books not found',
       });
 
-    return response.json({ borrowedBooks, book });
+    return response.json({
+      borrowedBooks,
+      book,
+      hasPreviousPage,
+      hasNextPage,
+      totalBooks,
+      totalPages,
+    });
   }
 
   public static async ListAllBooksDetail(request: Request, response: Response) {
+    const { page = 1, pageSize = 10 } = request.query;
+
+    const pageNumber = parseInt(page as string, 10);
+    const pageSizeNumber = parseInt(pageSize as string, 10);
+    const skip = (pageNumber - 1) * pageSizeNumber;
+    const take = pageSizeNumber;
+    const totalBooks = await prisma.borrowedBook.count();
+    const totalPages = Math.ceil(totalBooks / pageSizeNumber);
+
+    const hasPreviousPage = pageNumber > 1;
+    const hasNextPage = pageNumber < totalPages;
+
     const borrowedBooks = await prisma.borrowedBook.findMany({
       include: {
         user: {
@@ -50,6 +87,8 @@ export class ReportController {
         },
         book: true,
       },
+      skip,
+      take,
     });
 
     if (!borrowedBooks)
@@ -57,7 +96,13 @@ export class ReportController {
         message: 'borrowed books not found',
       });
 
-    return response.json({ borrowedBooks });
+    return response.json({
+      borrowedBooks,
+      totalBooks,
+      totalPages,
+      hasPreviousPage,
+      hasNextPage,
+    });
   }
 
   public static async ReportUserController(

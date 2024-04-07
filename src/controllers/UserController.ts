@@ -68,8 +68,8 @@ export class UserController {
 
     const skip = (pageNumber - 1) * pageSizeNumber;
     const take = pageSizeNumber;
-    const totalBooks = await prisma.book.count();
-    const totalPages = Math.ceil(totalBooks / pageSizeNumber);
+    const totalUsers = await prisma.book.count();
+    const totalPages = Math.ceil(totalUsers / pageSizeNumber);
 
     const hasPreviousPage = pageNumber > 1;
     const hasNextPage = pageNumber < totalPages;
@@ -93,7 +93,7 @@ export class UserController {
 
     return response.json({
       users,
-      totalBooks,
+      totalUsers,
       totalPages,
       hasPreviousPage,
       hasNextPage,

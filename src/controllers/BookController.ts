@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import { prisma } from '@/database';
 import { IBook } from '@/interfaces/IBook';
 import { AuthenticatedRequest } from '@/middlewares/authMiddleware';
+import { BookStatus } from '@prisma/client';
 
 export class BookController {
   static async CreateBook(request: Request, response: Response) {
@@ -33,10 +34,9 @@ export class BookController {
 
   static async ListBook(request: AuthenticatedRequest, response: Response) {
     try {
-      const { page = 1, pageSize = 10 } = request.query;
+      const { page = 1, pageSize = 10, status } = request.query;
       const pageNumber = parseInt(page as string, 10);
       const pageSizeNumber = parseInt(pageSize as string, 10);
-
       const skip = (pageNumber - 1) * pageSizeNumber;
       const take = pageSizeNumber;
       const totalBooks = await prisma.book.count();
@@ -46,6 +46,9 @@ export class BookController {
       const hasNextPage = pageNumber < totalPages;
 
       const selectedBooks = await prisma.book.findMany({
+        where: {
+          status: status as BookStatus,
+        },
         include: {
           BorrowedBook: {
             select: {
