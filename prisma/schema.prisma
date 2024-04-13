@@ -74,9 +74,18 @@ model Book {
   name         String
   author       String
   qtd          Int
-  position     String
   status       BookStatus
   Report       Report[]
   created_at   DateTime       @default(now())
   BorrowedBook BorrowedBook[]
+  Shelf Shelf[]
+}
+
+model Shelf {
+  id           String         @id @default(uuid())
+  gender  String
+  position Int
+
+  book   Book   @relation(fields: [bookId], references: [id])
+  bookId String
 }
