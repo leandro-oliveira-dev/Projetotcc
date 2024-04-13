@@ -87,5 +87,5 @@ model Shelf {
   position Int
 
   book   Book   @relation(fields: [bookId], references: [id])
-  bookId String
+  bookId String @unique
 }
