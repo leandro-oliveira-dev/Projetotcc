@@ -8,14 +8,20 @@ import { BookStatus } from '@prisma/client';
 export class BookController {
   static async CreateBook(request: Request, response: Response) {
     try {
-      const { qtd, code, name, author, position, status }: IBook = request.body;
+      const { qtd, code, name, author, position, status, gender }: IBook =
+        request.body;
 
       const book = await prisma.book.create({
         data: {
           name,
           qtd: Number(qtd),
           author,
-          position,
+          Shelf: {
+            create: {
+              position: Number(position),
+              gender,
+            },
+          },
           status,
           code: Number(code),
         },
@@ -30,6 +36,29 @@ export class BookController {
         message: 'Falha ao cadastrar o livro',
       });
     }
+  }
+
+  static async ListOneBookByCode(
+    request: AuthenticatedRequest,
+    response: Response
+  ) {
+    const { codeId } = request.params;
+
+    const book = await prisma.book.findFirst({
+      include: {
+        Shelf: {
+          select: {
+            gender: true,
+            position: true,
+          },
+        },
+      },
+      where: {
+        code: Number(codeId),
+      },
+    });
+
+    return response.json(book);
   }
 
   static async ListBook(request: AuthenticatedRequest, response: Response) {
@@ -50,6 +79,12 @@ export class BookController {
           status: status as BookStatus,
         },
         include: {
+          Shelf: {
+            select: {
+              gender: true,
+              position: true,
+            },
+          },
           BorrowedBook: {
             select: {
               id: true,
@@ -95,7 +130,7 @@ export class BookController {
   }
 
   static async UpdateBook(request: Request, response: Response) {
-    const { name, author, position, status, code, qtd } = request.body;
+    const { name, author, status, code, qtd, position, gender } = request.body;
     const { id } = request.params;
 
     const bookExists = await prisma.book.findFirst({
@@ -120,8 +155,17 @@ export class BookController {
         code,
         author,
         qtd,
-        position,
         status,
+      },
+    });
+
+    await prisma.shelf.update({
+      where: {
+        bookId: id,
+      },
+      data: {
+        position,
+        gender,
       },
     });
 
@@ -130,6 +174,12 @@ export class BookController {
         id,
       },
       include: {
+        Shelf: {
+          select: {
+            gender: true,
+            position: true,
+          },
+        },
         BorrowedBook: {
           select: {
             id: true,

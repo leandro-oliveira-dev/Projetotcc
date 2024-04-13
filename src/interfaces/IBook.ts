@@ -7,4 +7,5 @@ export interface IBook {
   position: string;
   status: IBookStatus;
   code: number;
+  gender: string;
 }

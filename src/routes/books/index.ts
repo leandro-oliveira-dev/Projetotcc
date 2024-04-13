@@ -10,6 +10,7 @@ const booksRouter = Router();
 booksRouter.use(authMiddleware);
 booksRouter.post('/books/create', BookController.CreateBook);
 booksRouter.get('/books/list', BookController.ListBook);
+booksRouter.get('/books/code/:codeId', BookController.ListOneBookByCode);
 booksRouter.put('/books/update/:id', BookController.UpdateBook);
 booksRouter.delete('/books/delete/:code', BookController.DeleteBook);
 booksRouter.put('/books/borrow/:bookId', BorrowBookController.CreateBorrowBook);
