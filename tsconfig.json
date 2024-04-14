@@ -5,7 +5,6 @@
     "typeRoots": ["./types"],
     "module": "commonjs",
     "outDir": "./dist",
-    "rootDir": "./src",
     "strict": true,
     "strictPropertyInitialization": false,
     "esModuleInterop": true,
@@ -17,6 +16,7 @@
       "@/*": ["./src/*"]
     }
   },
+  "include": ["src"],
   "exclude": ["./src/**/**/*.spec.ts", "dist/", "node_modules", "test"],
   "typeRoots": ["@types"]
 }

@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node-dev -r tsconfig-paths/register ./src/server.ts"
+    "dev": "ts-node-dev -r tsconfig-paths/register ./src/server.ts",
+    "build": "tsc"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
