@@ -25,6 +25,14 @@ export class BookController {
           status,
           code: Number(code),
         },
+        include: {
+          Shelf: {
+            select: {
+              gender: true,
+              position: true,
+            },
+          },
+        },
       });
 
       return response.json({
@@ -159,11 +167,16 @@ export class BookController {
       },
     });
 
-    await prisma.shelf.update({
+    await prisma.shelf.upsert({
       where: {
         bookId: id,
       },
-      data: {
+      update: {
+        position,
+        gender,
+      },
+      create: {
+        bookId: id,
         position,
         gender,
       },
