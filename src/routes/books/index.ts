@@ -27,4 +27,6 @@ booksRouter.put(
   BorrowBookController.ReturnBorrowedBook
 );
 
+// Importe o método do controller que lidará com a busca de todos os livros
+booksRouter.get('/books/all', BookController.ListAllBooks);
 export { booksRouter };

@@ -235,4 +235,17 @@ export class BookController {
       book,
     });
   }
+
+  static async ListAllBooks(req: Request, res: Response) {
+    try {
+      // Busque todos os livros no banco de dados
+      const books = await prisma.book.findMany(); // Usando prisma para buscar todos os livros
+
+      // Retorne os livros como resposta
+      return res.status(200).json({ books });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+  }
 }
