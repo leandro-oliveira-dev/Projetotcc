@@ -1,20 +1,19 @@
-import { Request, Response, response } from 'express';
+import { Request, Response } from 'express';
 
 import { prisma } from '@/database';
 import { IBook } from '@/interfaces/IBook';
 import { AuthenticatedRequest } from '@/middlewares/authMiddleware';
 import { BookStatus } from '@prisma/client';
-import { Interface } from 'readline';
 
 interface IFindBooks {
-  where: { status: BookStatus };
-  userId: string;
+  where?: { status: BookStatus };
+  userId?: string;
   skip: number;
   take: number;
 }
 
 export class BookController {
-  public async findAllBooks({ userId, skip, take, where }: IFindBooks) {
+  static async findAllBooks({ userId, skip, take, where }: IFindBooks) {
     const selectedBooks = await prisma.book.findMany({
       where,
       include: {
@@ -132,11 +131,11 @@ export class BookController {
       const hasNextPage = pageNumber < totalPages;
       const userId = request.authenticated?.userId;
 
-      const books = findAllBooks({
+      const books = this.findAllBooks({
         userId,
         skip,
         take,
-        where: { status },
+        where: { status: status as BookStatus },
       });
 
       return response.json({
@@ -255,7 +254,7 @@ export class BookController {
 
   static async ListAllBooks(request: AuthenticatedRequest, response: Response) {
     try {
-      const { page = 1, pageSize = 10, status } = request.query;
+      const { page = 1, pageSize = 10 } = request.query;
       const pageNumber = parseInt(page as string, 10);
       const pageSizeNumber = parseInt(pageSize as string, 10);
       const skip = (pageNumber - 1) * pageSizeNumber;
@@ -267,10 +266,16 @@ export class BookController {
       const hasNextPage = pageNumber < totalPages;
       const userId = request.authenticated?.userId;
       // Busque todos os livros no banco de dados
-      const book = findAllBooks({ userId, skip, take });
+      const books = this.findAllBooks({ userId, skip, take });
 
       // Retorne os livros como resposta
-      return response.status(200).json({ books });
+      return response.json({
+        books,
+        totalBooks,
+        totalPages,
+        hasPreviousPage,
+        hasNextPage,
+      });
     } catch (error) {
       console.log(error);
       return response.status(500).json({ message: 'Internal server error' });
