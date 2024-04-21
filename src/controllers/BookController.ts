@@ -6,54 +6,59 @@ import { AuthenticatedRequest } from '@/middlewares/authMiddleware';
 import { BookStatus } from '@prisma/client';
 
 interface IFindBooks {
-  where?: { status: BookStatus };
+  where?: {
+    status?: BookStatus;
+    name?: {
+      contains: string;
+    };
+  };
   userId?: string;
   skip: number;
   take: number;
 }
 
+async function findAllBooks({ userId, skip, take, where }: IFindBooks) {
+  const selectedBooks = await prisma.book.findMany({
+    where,
+    include: {
+      Shelf: {
+        select: {
+          gender: true,
+          position: true,
+        },
+      },
+      BorrowedBook: {
+        select: {
+          id: true,
+          userId: true,
+          returnAt: true,
+        },
+        where: {
+          returnAt: null,
+        },
+      },
+    },
+    orderBy: {
+      created_at: 'desc',
+    },
+    skip,
+    take,
+  });
+
+  const books = selectedBooks.map((book) => {
+    const alreadyBorrowed =
+      book.BorrowedBook.filter(
+        (borrowedBook) =>
+          borrowedBook.userId === userId && borrowedBook.returnAt === null
+      ).length > 0;
+
+    return { ...book, alreadyBorrowed };
+  });
+
+  return books;
+}
+
 export class BookController {
-  static async findAllBooks({ userId, skip, take, where }: IFindBooks) {
-    const selectedBooks = await prisma.book.findMany({
-      where,
-      include: {
-        Shelf: {
-          select: {
-            gender: true,
-            position: true,
-          },
-        },
-        BorrowedBook: {
-          select: {
-            id: true,
-            userId: true,
-            returnAt: true,
-          },
-          where: {
-            returnAt: null,
-          },
-        },
-      },
-      orderBy: {
-        created_at: 'desc',
-      },
-      skip,
-      take,
-    });
-
-    const books = selectedBooks.map((book) => {
-      const alreadyBorrowed =
-        book.BorrowedBook.filter(
-          (borrowedBook) =>
-            borrowedBook.userId === userId && borrowedBook.returnAt === null
-        ).length > 0;
-
-      return alreadyBorrowed;
-    });
-
-    return books;
-  }
-
   static async CreateBook(request: Request, response: Response) {
     try {
       const { qtd, code, name, author, position, status, gender }: IBook =
@@ -119,7 +124,7 @@ export class BookController {
 
   static async ListBook(request: AuthenticatedRequest, response: Response) {
     try {
-      const { page = 1, pageSize = 10, status } = request.query;
+      const { page = 1, pageSize = 10, status, name } = request.query;
       const pageNumber = parseInt(page as string, 10);
       const pageSizeNumber = parseInt(pageSize as string, 10);
       const skip = (pageNumber - 1) * pageSizeNumber;
@@ -131,11 +136,14 @@ export class BookController {
       const hasNextPage = pageNumber < totalPages;
       const userId = request.authenticated?.userId;
 
-      const books = this.findAllBooks({
+      const books = await findAllBooks({
         userId,
         skip,
         take,
-        where: { status: status as BookStatus },
+        where: {
+          status: status as BookStatus,
+          ...(name && { name: { contains: String(name) } }),
+        },
       });
 
       return response.json({
@@ -149,6 +157,7 @@ export class BookController {
       console.error(error);
       return response.status(500).json({
         message: 'Falha ao listar os livros',
+        error,
       });
     }
   }
@@ -254,7 +263,7 @@ export class BookController {
 
   static async ListAllBooks(request: AuthenticatedRequest, response: Response) {
     try {
-      const { page = 1, pageSize = 10 } = request.query;
+      const { page = 1, pageSize = 10, name } = request.query;
       const pageNumber = parseInt(page as string, 10);
       const pageSizeNumber = parseInt(pageSize as string, 10);
       const skip = (pageNumber - 1) * pageSizeNumber;
@@ -266,7 +275,16 @@ export class BookController {
       const hasNextPage = pageNumber < totalPages;
       const userId = request.authenticated?.userId;
       // Busque todos os livros no banco de dados
-      const books = this.findAllBooks({ userId, skip, take });
+      const books = await findAllBooks({
+        userId,
+        skip,
+        take,
+        where: {
+          name: {
+            contains: String(name),
+          },
+        },
+      });
 
       // Retorne os livros como resposta
       return response.json({
