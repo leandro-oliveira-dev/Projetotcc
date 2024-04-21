@@ -29,17 +29,29 @@ jobs:
       - run: yarn build
 
       - name: ssh deploy
-        uses: easingthemes/ssh-deploy@v4.1.8
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-          REMOTE_USER: ${{ secrets.USERNAME }}
-          TARGET: ${{ secrets.TARGET_DIR }}
-          EXCLUDE: '.git/, /node_modules/'
-          SCRIPT_BEFORE: |
-            source ~/.nvm/nvm.sh; npm install pm2 -g
-            source ~/.nvm/nvm.sh; npm install yarn -g
-          SCRIPT_AFTER: |
-            source ~/.nvm/nvm.sh; cd deploy && yarn;
-            pm2 delete biblioteca
-            pm2 start ~/deploy/dist/server.js --name="biblioteca"  --env=../../env
+          uses: appleboy/ssh-action@master
+          with:
+              host: ${{ secrets.REMOTE_HOST }}
+              username: ${{ secrets.USERNAME }}
+              key: ${{ secrets.EC2_SSH_KEY }}
+              port: 22
+              script: |
+                source ~/.nvm/nvm.sh; npm install pm2 -g
+                source ~/.nvm/nvm.sh; npm install yarn -g
+                source ~/.nvm/nvm.sh; cd deploy && yarn;
+                pm2 delete biblioteca
+                pm2 start ~/deploy/dist/server.js --name="biblioteca"  --env=../../env
+        # uses: easingthemes/ssh-deploy@v4.1.8
+        # env:
+        #   SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+        #   REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+        #   REMOTE_USER: ${{ secrets.USERNAME }}
+        #   TARGET: ${{ secrets.TARGET_DIR }}
+        #   EXCLUDE: '.git/, /node_modules/'
+        #   SCRIPT_BEFORE: |
+        #     source ~/.nvm/nvm.sh; npm install pm2 -g
+        #     source ~/.nvm/nvm.sh; npm install yarn -g
+        #   SCRIPT_AFTER: |
+        #     source ~/.nvm/nvm.sh; cd deploy && yarn;
+        #     pm2 delete biblioteca
+        #     pm2 start ~/deploy/dist/server.js --name="biblioteca"  --env=../../env
