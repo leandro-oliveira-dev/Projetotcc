@@ -1,11 +1,60 @@
-import { Request, Response } from 'express';
+import { Request, Response, response } from 'express';
 
 import { prisma } from '@/database';
 import { IBook } from '@/interfaces/IBook';
 import { AuthenticatedRequest } from '@/middlewares/authMiddleware';
 import { BookStatus } from '@prisma/client';
+import { Interface } from 'readline';
+
+interface IFindBooks {
+  where: { status: BookStatus };
+  userId: string;
+  skip: number;
+  take: number;
+}
 
 export class BookController {
+  public async findAllBooks({ userId, skip, take, where }: IFindBooks) {
+    const selectedBooks = await prisma.book.findMany({
+      where,
+      include: {
+        Shelf: {
+          select: {
+            gender: true,
+            position: true,
+          },
+        },
+        BorrowedBook: {
+          select: {
+            id: true,
+            userId: true,
+            returnAt: true,
+          },
+          where: {
+            returnAt: null,
+          },
+        },
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
+      skip,
+      take,
+    });
+
+    const books = selectedBooks.map((book) => {
+      const alreadyBorrowed =
+        book.BorrowedBook.filter(
+          (borrowedBook) =>
+            borrowedBook.userId === userId && borrowedBook.returnAt === null
+        ).length > 0;
+
+      return alreadyBorrowed;
+    });
+
+    return books;
+  }
+
   static async CreateBook(request: Request, response: Response) {
     try {
       const { qtd, code, name, author, position, status, gender }: IBook =
@@ -81,45 +130,13 @@ export class BookController {
 
       const hasPreviousPage = pageNumber > 1;
       const hasNextPage = pageNumber < totalPages;
+      const userId = request.authenticated?.userId;
 
-      const selectedBooks = await prisma.book.findMany({
-        where: {
-          status: status as BookStatus,
-        },
-        include: {
-          Shelf: {
-            select: {
-              gender: true,
-              position: true,
-            },
-          },
-          BorrowedBook: {
-            select: {
-              id: true,
-              userId: true,
-              returnAt: true,
-            },
-            where: {
-              returnAt: null,
-            },
-          },
-        },
-        orderBy: {
-          created_at: 'desc',
-        },
+      const books = findAllBooks({
+        userId,
         skip,
         take,
-      });
-
-      const books = selectedBooks.map((book) => {
-        const alreadyBorrowed =
-          book.BorrowedBook.filter(
-            (borrowedBook) =>
-              borrowedBook.userId === request.authenticated?.userId &&
-              borrowedBook.returnAt === null
-          ).length > 0;
-
-        return { ...book, alreadyBorrowed };
+        where: { status },
       });
 
       return response.json({
@@ -236,16 +253,27 @@ export class BookController {
     });
   }
 
-  static async ListAllBooks(req: Request, res: Response) {
+  static async ListAllBooks(request: AuthenticatedRequest, response: Response) {
     try {
+      const { page = 1, pageSize = 10, status } = request.query;
+      const pageNumber = parseInt(page as string, 10);
+      const pageSizeNumber = parseInt(pageSize as string, 10);
+      const skip = (pageNumber - 1) * pageSizeNumber;
+      const take = pageSizeNumber;
+      const totalBooks = await prisma.book.count();
+      const totalPages = Math.ceil(totalBooks / pageSizeNumber);
+
+      const hasPreviousPage = pageNumber > 1;
+      const hasNextPage = pageNumber < totalPages;
+      const userId = request.authenticated?.userId;
       // Busque todos os livros no banco de dados
-      const books = await prisma.book.findMany(); // Usando prisma para buscar todos os livros
+      const book = findAllBooks({ userId, skip, take });
 
       // Retorne os livros como resposta
-      return res.status(200).json({ books });
+      return response.status(200).json({ books });
     } catch (error) {
       console.log(error);
-      return res.status(500).json({ message: 'Internal server error' });
+      return response.status(500).json({ message: 'Internal server error' });
     }
   }
 }
