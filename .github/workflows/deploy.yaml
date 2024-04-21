@@ -29,18 +29,18 @@ jobs:
       - run: yarn build
 
       - name: ssh deploy
-          uses: appleboy/ssh-action@master
-          with:
-              host: ${{ secrets.REMOTE_HOST }}
-              username: ${{ secrets.USERNAME }}
-              key: ${{ secrets.EC2_SSH_KEY }}
-              port: 22
-              script: |
-                source ~/.nvm/nvm.sh; npm install pm2 -g
-                source ~/.nvm/nvm.sh; npm install yarn -g
-                source ~/.nvm/nvm.sh; cd deploy && yarn;
-                pm2 delete biblioteca
-                pm2 start ~/deploy/dist/server.js --name="biblioteca"  --env=../../env
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            source ~/.nvm/nvm.sh; npm install pm2 -g
+            source ~/.nvm/nvm.sh; npm install yarn -g
+            source ~/.nvm/nvm.sh; cd deploy && yarn;
+            pm2 delete biblioteca
+            pm2 start ~/deploy/dist/server.js --name="biblioteca"  --env=../../env
         # uses: easingthemes/ssh-deploy@v4.1.8
         # env:
         #   SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
