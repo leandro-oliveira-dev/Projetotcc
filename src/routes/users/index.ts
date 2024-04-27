@@ -16,5 +16,6 @@ userRouter.delete('/users/delete/:userId', UserController.DisableUser);
 userRouter.put('/users/enable/:userId', UserController.EnableUser);
 
 userRouter.get('/users/usuario-report', ReportController.ReportUserController);
+userRouter.get('/users/all', UserController.listAllUsers);
 
 export { userRouter };
