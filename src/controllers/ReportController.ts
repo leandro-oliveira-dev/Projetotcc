@@ -105,6 +105,30 @@ export class ReportController {
     });
   }
 
+  public static async ListBooksReportCsv(request: Request, response: Response) {
+    const borrowedBooks = await prisma.borrowedBook.findMany({
+      include: {
+        user: {
+          include: {
+            auth: {
+              select: {
+                ra: true,
+              },
+            },
+          },
+        },
+        book: true,
+      },
+    });
+
+    if (!borrowedBooks)
+      return response.status(404).json({
+        message: 'borrowed books not found',
+      });
+
+    return response.json(borrowedBooks);
+  }
+
   public static async ReportUserController(
     request: Request,
     response: Response

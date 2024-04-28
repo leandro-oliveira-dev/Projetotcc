@@ -22,6 +22,11 @@ booksRouter.get(
 
 booksRouter.get('/books/borrowed-report', ReportController.ListAllBooksDetail);
 
+booksRouter.get(
+  '/books/borrowed-report/csv-download',
+  ReportController.ListBooksReportCsv
+);
+
 booksRouter.put(
   '/books/borrow/:borrowedBookId/return',
   BorrowBookController.ReturnBorrowedBook
