@@ -3,6 +3,18 @@ import { Request, Response } from 'express';
 
 import { prisma } from '@/database';
 import { PasswordController } from './PasswordController';
+import { AuthenticatedRequest } from '@/middlewares/authMiddleware';
+
+interface IFindUsers {
+  where?: {
+    name?: {
+      contains: string;
+    };
+  };
+  userId?: string;
+  skip: number;
+  take: number;
+}
 
 export class UserController {
   static async CreateUser(request: Request, response: Response) {
@@ -170,5 +182,56 @@ export class UserController {
     });
 
     return response.sendStatus(204);
+  }
+
+  // Função para encontrar usuários com base em critérios de pesquisa
+  static async findAllUsers({ skip, take, where }: IFindUsers) {
+    const selectedUsers = await prisma.user.findMany({
+      where: {
+        name: {
+          contains: String(where?.name), // Pesquisa por nome
+        },
+      },
+
+      skip,
+      take,
+    });
+
+    return selectedUsers;
+  }
+
+  static async listAllUsers(request: AuthenticatedRequest, response: Response) {
+    try {
+      const { page = 1, pageSize = 10, name } = request.query;
+      const pageNumber = parseInt(page as string, 10);
+      const pageSizeNumber = parseInt(pageSize as string, 10);
+      const skip = (pageNumber - 1) * pageSizeNumber;
+      const take = pageSizeNumber;
+
+      const totalUsers = await UserController.findAllUsers({
+        skip,
+        take,
+        where: {
+          name: {
+            contains: String(name),
+          },
+        },
+      });
+
+      const totalPages = Math.ceil(totalUsers.length / pageSizeNumber);
+      const hasPreviousPage = pageNumber > 1;
+      const hasNextPage = pageNumber < totalPages;
+
+      return response.json({
+        users: totalUsers,
+        totalUsers: totalUsers.length,
+        totalPages,
+        hasPreviousPage,
+        hasNextPage,
+      });
+    } catch (error) {
+      console.log(error);
+      return response.status(500).json({ message: 'Internal server error' });
+    }
   }
 }
