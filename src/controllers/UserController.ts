@@ -74,19 +74,22 @@ export class UserController {
   }
 
   static async ListUser(request: Request, response: Response) {
-    const { page = 1, pageSize = 10 } = request.query;
+    const { page = 1, pageSize = 10, name } = request.query;
     const pageNumber = parseInt(page as string, 10);
     const pageSizeNumber = parseInt(pageSize as string, 10);
 
     const skip = (pageNumber - 1) * pageSizeNumber;
     const take = pageSizeNumber;
-    const totalUsers = await prisma.book.count();
+    const totalUsers = await prisma.user.count();
     const totalPages = Math.ceil(totalUsers / pageSizeNumber);
 
     const hasPreviousPage = pageNumber > 1;
     const hasNextPage = pageNumber < totalPages;
 
     const users = await prisma.user.findMany({
+      where: {
+        ...(name && { name: { contains: String(name) } }),
+      },
       orderBy: {
         created_at: 'desc',
       },
@@ -198,40 +201,5 @@ export class UserController {
     });
 
     return selectedUsers;
-  }
-
-  static async listAllUsers(request: AuthenticatedRequest, response: Response) {
-    try {
-      const { page = 1, pageSize = 10, name } = request.query;
-      const pageNumber = parseInt(page as string, 10);
-      const pageSizeNumber = parseInt(pageSize as string, 10);
-      const skip = (pageNumber - 1) * pageSizeNumber;
-      const take = pageSizeNumber;
-
-      const totalUsers = await UserController.findAllUsers({
-        skip,
-        take,
-        where: {
-          name: {
-            contains: String(name),
-          },
-        },
-      });
-
-      const totalPages = Math.ceil(totalUsers.length / pageSizeNumber);
-      const hasPreviousPage = pageNumber > 1;
-      const hasNextPage = pageNumber < totalPages;
-
-      return response.json({
-        users: totalUsers,
-        totalUsers: totalUsers.length,
-        totalPages,
-        hasPreviousPage,
-        hasNextPage,
-      });
-    } catch (error) {
-      console.log(error);
-      return response.status(500).json({ message: 'Internal server error' });
-    }
   }
 }
