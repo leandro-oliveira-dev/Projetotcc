@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import cors from 'cors';
 import Express from 'express';
 
@@ -33,6 +36,5 @@ app.get('/doarLivro', (req, res) => {
 const PORT = process.env.PORT;
 
 app.listen(PORT, () => {
-  console.log('database', process.env.DATABASE_URL);
   console.log(`Server is running ${PORT}`);
 });
