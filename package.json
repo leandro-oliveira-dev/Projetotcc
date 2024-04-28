@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "ts-node-dev -r tsconfig-paths/register ./src/server.ts",
-    "build": "tsc"
+    "build": "yarn tsc --project tsconfig.json && tscpaths -p tsconfig.json -s ./src -o ./dist"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
@@ -25,6 +25,7 @@
     "eslint": "^8.56.0",
     "prisma": "^5.10.2",
     "ts-node-dev": "^2.0.0",
+    "tscpaths": "^0.0.9",
     "typescript": "^5.3.3"
   },
   "dependencies": {

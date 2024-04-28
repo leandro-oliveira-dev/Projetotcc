@@ -42,4 +42,4 @@ jobs:
           SCRIPT_AFTER: |
             source ~/.nvm/nvm.sh; cd deploy && yarn;
             pm2 delete biblioteca
-            pm2 start ~/deploy/dist/server.js --name="biblioteca"  --env=../../env
+            pm2 start ~/deploy/dist/server.js --name="biblioteca"  --env=~/deploy/.env
