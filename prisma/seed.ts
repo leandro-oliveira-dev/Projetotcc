@@ -52,6 +52,14 @@ async function main() {
     password: '1234',
     isAdmin: true,
   });
+
+  const admin2 = await CreateUser({
+    name: 'Edmilson',
+    email: 'einsteintales@hotmail.com',
+    ra: '1111',
+    password: '1234',
+    isAdmin: true,
+  });
 }
 
 main()
