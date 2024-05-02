@@ -53,9 +53,34 @@ async function main() {
     isAdmin: true,
   });
 
-  const admin2 = await CreateUser({
+  const admin1 = await CreateUser({
     name: 'Edmilson',
-    email: 'einsteintales@hotmail.com',
+    email: 'edmilson@gmail.com',
+    ra: '1111',
+    password: '1234',
+    isAdmin: true,
+  });
+
+  const admin2 = await CreateUser({
+    name: 'Ieda',
+    email: 'Ieda@gmail.com',
+    ra: '1111',
+    password: '1234',
+    isAdmin: true,
+  });
+
+  const admin3 = await CreateUser({
+    name: 'Tiago',
+    email: 'tiago@gmail.com',
+    ra: '1111',
+    password: '1234',
+    isAdmin: true,
+  });
+
+  const admin4 = await CreateUser({
+    name: 'Leandro',
+    email: 'leandroo@gmail.com',
+
     ra: '1111',
     password: '1234',
     isAdmin: true,
