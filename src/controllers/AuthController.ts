@@ -1,5 +1,5 @@
 import { prisma } from '@/database';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { AuthenticatedRequest } from '@/middlewares/authMiddleware';
@@ -62,4 +62,41 @@ export class AuthController {
 
     return response.json(user);
   }
+
+  /* static async recuperarSenha(req: Request, res: Response) {
+    if (req.method !== 'POST') {
+      return res.status(405).json({ error: 'Método não permitido' });
+    }
+
+    const { newPassword, email } = req.body;
+
+    try {
+      // Encontra o usuário com base no e-mail fornecido
+      const user = await prisma.user.findUnique({
+        where: {
+          email: email as string, 
+        },
+      });
+
+      // Verifica se o usuário existe
+      if (!user) {
+        return res.status(404).json({ error: 'Usuário não encontrado' });
+      }
+
+      // Atualiza a senha do usuário
+      await prisma.user.update({
+        where: {
+          email: email as string, 
+        },
+        data: {
+          password: newPassword,
+        },
+      });
+
+      res.status(200).json({ message: 'Senha atualizada com sucesso' });
+    } catch (error) {
+      console.error('Erro ao atualizar a senha:', error);
+      res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  }*/
 }
