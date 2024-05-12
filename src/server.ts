@@ -7,6 +7,7 @@ import Express from 'express';
 import { userRouter } from '@/routes/users';
 import { booksRouter } from '@/routes/books';
 import { authRouter } from '@/routes/public/auth';
+import { passwordRouter } from '@/routes/public/password';
 
 const app = Express();
 
@@ -15,6 +16,7 @@ app.use(cors());
 app.use(Express.json());
 
 app.use(authRouter);
+app.use(passwordRouter);
 
 app.use(booksRouter);
 app.use(userRouter);

@@ -2,8 +2,7 @@
 import { Request, Response } from 'express';
 
 import { prisma } from '@/database';
-import { PasswordController } from './PasswordController';
-import { AuthenticatedRequest } from '@/middlewares/authMiddleware';
+import { PasswordService } from '@/services/PasswordService';
 
 interface IFindUsers {
   where?: {
@@ -30,7 +29,7 @@ export class UserController {
       });
     }
 
-    const generatedPassword = await PasswordController.Create(password);
+    const generatedPassword = await PasswordService.Create(password);
 
     if (!generatedPassword) {
       return response.status(400).json({
