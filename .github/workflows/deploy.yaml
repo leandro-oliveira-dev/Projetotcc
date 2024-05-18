@@ -41,5 +41,6 @@ jobs:
             source ~/.nvm/nvm.sh; npm install yarn -g
           SCRIPT_AFTER: |
             source ~/.nvm/nvm.sh; cd deploy && yarn;
+            yarn prisma generate
             pm2 delete biblioteca
             pm2 start ~/deploy/dist/server.js --name="biblioteca"  --env=~/deploy/.env
