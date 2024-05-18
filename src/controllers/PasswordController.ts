@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { prisma } from '@/database';
+import { SendEmailService } from '@/services/SendEmailService';
 
 export class PasswordController {
   static async reset(request: Request, response: Response) {
@@ -36,6 +37,27 @@ export class PasswordController {
   }
 
   static async sendResetEmail(request: Request, response: Response) {
+    const { email } = request.body;
+
+    if (!email) {
+      return response.status(401).json({
+        message: 'dados nao informados',
+      });
+    }
+
+    const sendEmailService = new SendEmailService({
+      fromEmail: 'system@bibliotecaetec.icu',
+      subject: 'Alteracao de senha',
+      returnToEmail: 'system@bibliotecaetec.icu',
+      toEmail: email,
+      html: `
+        <p>Troque sua senha no link abaixo<p>
+        <a href="https://google.com">https://google.com/token=base64=</a>
+      `,
+    });
+
+    await sendEmailService.sendEmail();
+
     return response.sendStatus(200);
   }
 }
