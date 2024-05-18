@@ -45,6 +45,7 @@ export class AuthController {
   static async CurrentUser(request: AuthenticatedRequest, response: Response) {
     if (!request.authenticated?.userId) return response.sendStatus(400);
 
+    //user
     const user = await prisma.user.findFirst({
       include: {
         auth: {
