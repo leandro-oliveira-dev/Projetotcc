@@ -8,6 +8,6 @@ passwordRouter.post(
   PasswordController.sendResetEmail
 );
 
-passwordRouter.post('/password/reset', PasswordController.reset);
+passwordRouter.put('/password/reset', PasswordController.resetPassword);
 
 export { passwordRouter };

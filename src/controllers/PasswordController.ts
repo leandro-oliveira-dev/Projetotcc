@@ -1,16 +1,20 @@
 import { Request, Response } from 'express';
 import { prisma } from '@/database';
 import { SendEmailService } from '@/services/SendEmailService';
+import { PasswordService } from '@/services/PasswordService';
+import { HashUser } from '@/services/HashUser';
 
 export class PasswordController {
-  static async reset(request: Request, response: Response) {
-    const { newPassword, email } = request.body;
+  static async resetPassword(request: Request, response: Response) {
+    const { newPassword, token } = request.body;
+
+    const authId = HashUser.decrypt(token);
 
     try {
       // Encontra o usuário com base no e-mail fornecido
       const auth = await prisma.auth.findFirst({
         where: {
-          email,
+          id: authId,
         },
       });
 
@@ -19,13 +23,15 @@ export class PasswordController {
         return response.status(404).json({ error: 'Usuário não encontrado' });
       }
 
+      const generatedPassword = await PasswordService.Create(newPassword);
+
       // Atualiza a senha do usuário
       await prisma.auth.update({
         where: {
-          email: email,
+          id: authId,
         },
         data: {
-          password: newPassword,
+          password: generatedPassword,
         },
       });
 
@@ -45,6 +51,20 @@ export class PasswordController {
       });
     }
 
+    const auth = await prisma.auth.findFirst({
+      where: {
+        email,
+      },
+    });
+
+    if (!auth) {
+      return response.status(401).json({
+        message: 'nenhum usuario encontrado',
+      });
+    }
+
+    const resetPasswordUrl = PasswordService.ResetPasswordUrl(auth.id);
+
     const sendEmailService = new SendEmailService({
       fromEmail: 'system@bibliotecaetec.icu',
       subject: 'Alteracao de senha',
@@ -52,7 +72,7 @@ export class PasswordController {
       toEmail: email,
       html: `
         <p>Troque sua senha no link abaixo<p>
-        <a href="https://google.com">https://google.com/token=base64=</a>
+        <a href="${resetPasswordUrl}">${resetPasswordUrl}</a>
       `,
     });
 
