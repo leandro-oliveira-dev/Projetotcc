@@ -1,4 +1,4 @@
-import { PasswordController } from '../src/controllers/PasswordController';
+import { PasswordService } from '../src/services/PasswordService';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -12,7 +12,7 @@ type ICreateUser = {
 };
 
 async function CreateUser({ email, ra, name, password, isAdmin }: ICreateUser) {
-  const generatedPassword = await PasswordController.Create(password);
+  const generatedPassword = await PasswordService.Create(password);
 
   if (!generatedPassword) return;
 
