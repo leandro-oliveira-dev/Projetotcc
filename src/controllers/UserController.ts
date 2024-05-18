@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 
 import { prisma } from '@/database';
 import { PasswordService } from '@/services/PasswordService';
+import { AuthenticatedRequest } from '@/middlewares/authMiddleware';
 
 interface IFindUsers {
   where?: {
@@ -16,6 +17,35 @@ interface IFindUsers {
 }
 
 export class UserController {
+  static async FirstAccess(request: AuthenticatedRequest, response: Response) {
+    const { newPassword } = request.body;
+    const userId = request.authenticated?.userId;
+
+    const auth = await prisma.auth.findFirst({
+      where: {
+        userId: userId,
+      },
+    });
+
+    if (!auth) {
+      return response.status(404).json({ error: 'Usuário não encontrado' });
+    }
+
+    const generatedPassword = await PasswordService.Create(newPassword);
+
+    await prisma.auth.update({
+      where: {
+        userId: userId,
+      },
+      data: {
+        password: generatedPassword,
+        first_access: false,
+      },
+    });
+
+    return response.status(200).json({ message: 'Senha criada com sucesso' });
+  }
+
   static async CreateUser(request: Request, response: Response) {
     const { name, email, ra, password, isAdmin } = request.body;
 

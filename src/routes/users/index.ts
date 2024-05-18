@@ -8,6 +8,7 @@ import { ReportController } from '@/controllers/ReportController';
 const userRouter = Router();
 
 userRouter.use(authMiddleware);
+userRouter.put('/users/first/access', UserController.FirstAccess);
 userRouter.post('/users/create', UserController.CreateUser);
 userRouter.put('/users/update/:userId', UserController.UpdateUser);
 userRouter.get('/users/list', UserController.ListUser);

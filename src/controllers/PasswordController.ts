@@ -35,10 +35,12 @@ export class PasswordController {
         },
       });
 
-      response.status(200).json({ message: 'Senha atualizada com sucesso' });
+      return response
+        .status(200)
+        .json({ message: 'Senha atualizada com sucesso' });
     } catch (error) {
       console.error('Erro ao atualizar a senha:', error);
-      response.status(500).json({ error: 'Erro interno do servidor' });
+      return response.status(500).json({ error: 'Erro interno do servidor' });
     }
   }
 
