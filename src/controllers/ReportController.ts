@@ -133,8 +133,22 @@ export class ReportController {
     request: Request,
     response: Response
   ) {
+    const { page = 1, pageSize = 10 } = request.query;
+
+    const pageNumber = parseInt(page as string, 10);
+    const pageSizeNumber = parseInt(pageSize as string, 10);
+    const skip = (pageNumber - 1) * pageSizeNumber;
+    const take = pageSizeNumber;
+    const totalUsers = await prisma.user.count();
+    const totalPages = Math.ceil(totalUsers / pageSizeNumber);
+
+    const hasPreviousPage = pageNumber > 1;
+    const hasNextPage = pageNumber < totalPages;
+
     const users = await prisma.user.findMany({
       include: { auth: { select: { ra: true } } },
+      skip,
+      take,
     });
 
     if (!users.length) {
@@ -143,6 +157,12 @@ export class ReportController {
       });
     }
 
-    return response.json(users);
+    return response.json({
+      users,
+      totalUsers,
+      totalPages,
+      hasPreviousPage,
+      hasNextPage,
+    });
   }
 }
