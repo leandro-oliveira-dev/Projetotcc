@@ -64,7 +64,7 @@ model User {
   auth         Auth?
   BorrowedBook BorrowedBook[]
   donation Donation []
-  
+  history History []
 }
 
 model Book {
@@ -74,6 +74,7 @@ model Book {
   author       String
   qtd          Int
   status       BookStatus
+  enabled    Boolean  @default(true)
   Report       Report[]
   created_at   DateTime       @default(now())
   BorrowedBook BorrowedBook[]
@@ -88,3 +89,14 @@ model Shelf {
   book   Book   @relation(fields: [bookId], references: [id])
   bookId String @unique
 }
+
+model History {
+  id           String         @id @default(uuid())
+  userId String 
+  user User @relation(fields: [userId], references: [id])
+  action String
+  description String
+
+  created_at DateTime @default(now())
+}
+

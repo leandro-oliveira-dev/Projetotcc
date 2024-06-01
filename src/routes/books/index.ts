@@ -12,7 +12,7 @@ booksRouter.post('/books/create', BookController.CreateBook);
 booksRouter.get('/books/list', BookController.ListBook);
 booksRouter.get('/books/code/:codeId', BookController.ListOneBookByCode);
 booksRouter.put('/books/update/:id', BookController.UpdateBook);
-booksRouter.delete('/books/delete/:code', BookController.DeleteBook);
+booksRouter.delete('/books/delete/:id', BookController.DeleteBook);
 booksRouter.put('/books/borrow/:bookId', BorrowBookController.CreateBorrowBook);
 
 booksRouter.get(

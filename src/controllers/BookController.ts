@@ -4,9 +4,11 @@ import { prisma } from '@/database';
 import { IBook } from '@/interfaces/IBook';
 import { AuthenticatedRequest } from '@/middlewares/authMiddleware';
 import { BookStatus } from '@prisma/client';
+import { HistoryService } from '@/services/HistoryService';
 
 interface IFindBooks {
   where?: {
+    enabled: boolean;
     status?: BookStatus;
     name?: {
       contains: string;
@@ -59,7 +61,7 @@ async function findAllBooks({ userId, skip, take, where }: IFindBooks) {
 }
 
 export class BookController {
-  static async CreateBook(request: Request, response: Response) {
+  static async CreateBook(request: AuthenticatedRequest, response: Response) {
     try {
       const { qtd, code, name, author, position, status, gender }: IBook =
         request.body;
@@ -86,6 +88,11 @@ export class BookController {
             },
           },
         },
+      });
+
+      HistoryService.onCreate({
+        userId: String(request.authenticated?.userId),
+        description: `cadastrou o livro: ${book.name} [ID: ${book.id}]`,
       });
 
       return response.json({
@@ -141,6 +148,7 @@ export class BookController {
         skip,
         take,
         where: {
+          enabled: true,
           status: status as BookStatus,
           ...(name && { name: { contains: String(name) } }),
         },
@@ -162,7 +170,7 @@ export class BookController {
     }
   }
 
-  static async UpdateBook(request: Request, response: Response) {
+  static async UpdateBook(request: AuthenticatedRequest, response: Response) {
     const { name, author, status, code, qtd, position, gender } = request.body;
     const { id } = request.params;
 
@@ -226,13 +234,18 @@ export class BookController {
       },
     });
 
+    HistoryService.onUpdate({
+      userId: String(request.authenticated?.userId),
+      description: `atualizou o livro: ${book?.name} [ID: ${book?.id}]`,
+    });
+
     return response.json({
       message: 'Sucesso: Livro atualizado com sucesso!',
       book,
     });
   }
 
-  static async DeleteBook(request: Request, response: Response) {
+  static async DeleteBook(request: AuthenticatedRequest, response: Response) {
     const { id } = request.params;
 
     const bookExists = await prisma.book.findFirst({
@@ -248,10 +261,18 @@ export class BookController {
       });
     }
 
-    const book = await prisma.book.delete({
+    const book = await prisma.book.update({
+      data: {
+        enabled: false,
+      },
       where: {
         id,
       },
+    });
+
+    HistoryService.onDelete({
+      userId: String(request.authenticated?.userId),
+      description: `deletou o livro: ${book.name} [ID: ${book?.id}]`,
     });
 
     return response.json({
@@ -280,6 +301,7 @@ export class BookController {
         skip,
         take,
         where: {
+          enabled: true,
           name: {
             contains: String(name),
           },
