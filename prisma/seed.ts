@@ -38,22 +38,15 @@ async function CreateUser({ email, ra, name, password, isAdmin }: ICreateUser) {
 }
 
 async function main() {
-  const student = await CreateUser({
-    name: 'aluno',
-    email: 'aluno@email.com',
-    ra: '2222',
-    password: '1234',
-  });
-
-  const admin = await CreateUser({
-    name: 'admin',
-    email: 'admin@email.com',
+  await CreateUser({
+    name: 'Pedro Tavares',
+    email: 'pedro.tavares18@etec.sp.gov.br',
     ra: '1111',
     password: '1234',
     isAdmin: true,
   });
 
-  const admin1 = await CreateUser({
+  await CreateUser({
     name: 'Edmilson',
     email: 'edmilson@gmail.com',
     ra: '1111',
@@ -61,7 +54,7 @@ async function main() {
     isAdmin: true,
   });
 
-  const admin2 = await CreateUser({
+  await CreateUser({
     name: 'Ieda',
     email: 'Ieda@gmail.com',
     ra: '1111',
@@ -69,7 +62,7 @@ async function main() {
     isAdmin: true,
   });
 
-  const admin3 = await CreateUser({
+  await CreateUser({
     name: 'Tiago',
     email: 'tiago@gmail.com',
     ra: '1111',
@@ -77,10 +70,9 @@ async function main() {
     isAdmin: true,
   });
 
-  const admin4 = await CreateUser({
+  await CreateUser({
     name: 'Leandro',
-    email: 'leandroo@gmail.com',
-
+    email: 'lleandro.silva@outlook.com',
     ra: '1111',
     password: '1234',
     isAdmin: true,
